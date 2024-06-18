@@ -18,10 +18,18 @@ cache_dir="${1}"
 # List of the packages to use.
 input_packages="${@:3}"
 
+if ! apt-fast --version >/dev/null 2>&1; then
+  log "Installing apt-fast for optimized installs..."
+  # Install apt-fast for optimized installs.
+  /bin/bash -c "$(curl -sL https://git.io/vokNn)"
+  log "done"
+
+  log_empty_line
+fi
 
 log "Updating APT package list..."
 if [[ -z "$(find -H /var/lib/apt/lists -maxdepth 0 -mmin -5)" ]]; then
-  sudo apt update > /dev/null
+  sudo apt-fast update >/dev/null
   log "done"
 else
   log "skipped (fresh within at least 5 minutes)"
@@ -30,7 +38,7 @@ fi
 log_empty_line
 
 packages="$(get_normalized_package_list "${input_packages}")"
-package_count=$(wc -w <<< "${packages}")
+package_count=$(wc -w <<<"${packages}")
 log "Clean installing and caching ${package_count} package(s)."
 
 log_empty_line
@@ -54,7 +62,7 @@ install_log_filepath="${cache_dir}/install.log"
 
 log "Clean installing ${package_count} packages..."
 # Zero interaction while installing or upgrading the system via apt.
-sudo DEBIAN_FRONTEND=noninteractive apt --yes install ${packages} > "${install_log_filepath}"
+sudo DEBIAN_FRONTEND=noninteractive apt-fast --yes install ${packages} >"${install_log_filepath}"
 log "done"
 log "Installation log written to ${install_log_filepath}"
 
@@ -63,13 +71,13 @@ log_empty_line
 installed_packages=$(get_installed_packages "${install_log_filepath}")
 log "Installed package list:"
 for installed_package in ${installed_packages}; do
-  # Reformat for human friendly reading.  
+  # Reformat for human friendly reading.
   log "- $(echo ${installed_package} | awk -F\= '{print $1" ("$2")"}')"
 done
 
 log_empty_line
 
-installed_packages_count=$(wc -w <<< "${installed_packages}")
+installed_packages_count=$(wc -w <<<"${installed_packages}")
 log "Caching ${installed_packages_count} installed packages..."
 for installed_package in ${installed_packages}; do
   cache_filepath="${cache_dir}/${installed_package}.tar"
@@ -80,11 +88,15 @@ for installed_package in ${installed_packages}; do
     log "  * Caching ${package_name} to ${cache_filepath}..."
 
     # Pipe all package files (no folders) and installation control data to Tar.
-    { dpkg -L "${package_name}" \
-      & get_install_script_filepath "" "${package_name}" "preinst" \
-      & get_install_script_filepath "" "${package_name}" "postinst"; } |
+    {
+      dpkg -L "${package_name}" \
+        &
+      get_install_script_filepath "" "${package_name}" "preinst" \
+        &
+      get_install_script_filepath "" "${package_name}" "postinst"
+    } |
       while IFS= read -r f; do test -f "${f}" -o -L "${f}" && get_tar_relpath "${f}"; done |
-      # Single quotes ensure literals like backslash get captured. Use \0 to avoid field separation.   
+      # Single quotes ensure literals like backslash get captured. Use \0 to avoid field separation.
       awk -F"\0" '{print "\x27"$1"\x27"}' |
       sudo xargs tar -cf "${cache_filepath}" -C /
 
