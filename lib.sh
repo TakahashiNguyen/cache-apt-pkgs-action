@@ -108,6 +108,8 @@ function get_normalized_package_list {
   # extraneous spaces at the middle, beginning and end
   # then sort.
 
+  echo ${1}
+
   local packages=$(echo "${1}" |
     sed 's/[,\]/ /g; s/\s\+/ /g; s/^\s\+//g; s/\s\+$//g' |
     sort -t' ')
