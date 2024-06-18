@@ -32,7 +32,7 @@ done
 log_empty_line
 
 log "Reading from main requested packages manifest..."
-for logline in $(cat "${cache_dir}/manifest_main.log" | tr ',' '\n' ); do
+for logline in $(cat "${cache_dir}/manifest_main.log" | tr ',' '\n'); do
   log "- $(echo "${logline}" | tr ':' ' ')"
 done
 log "done"
@@ -47,10 +47,10 @@ log "Restoring ${cached_filecount} packages from cache..."
 for cached_filepath in ${cached_filepaths}; do
 
   log "- $(basename "${cached_filepath}") restoring..."
-  sudo tar -xf "${cached_filepath}" -C "${cache_restore_root}" > /dev/null
+  sudo tar -xf "${cached_filepath}" -C "${cache_restore_root}" >/dev/null
   log "  done"
 
-  # Execute install scripts if available.    
+  # Execute install scripts if available.
   if test ${execute_install_scripts} == "true"; then
     # May have to add more handling for extracting pre-install script before extracting all files.
     # Keeping it simple for now.

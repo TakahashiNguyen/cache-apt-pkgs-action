@@ -37,9 +37,9 @@ log "done"
 # Create cache directory so artifacts can be saved.
 mkdir -p ${cache_dir}
 
-log "Validating action arguments (version='${version}', packages='${packages}')...";
-if grep -q " " <<< "${version}"; then
-  log "aborted" 
+log "Validating action arguments (version='${version}', packages='${packages}')..."
+if grep -q " " <<<"${version}"; then
+  log "aborted"
   log "Version value '${version}' cannot contain spaces." >&2
   exit 2
 fi
@@ -75,5 +75,5 @@ log "- Value hashed as '${key}'."
 log "done"
 
 key_filepath="${cache_dir}/cache_key.md5"
-echo ${key} > ${key_filepath}
+echo ${key} >${key_filepath}
 log "Hash value written to ${key_filepath}"

@@ -2,7 +2,7 @@
 
 # Don't fail on error. We use the exit status as a conditional.
 #
-# This is the default behavior but can be overriden by the caller in the 
+# This is the default behavior but can be overriden by the caller in the
 # SHELLOPTS env var.
 set +e
 
@@ -17,9 +17,10 @@ set +e
 #   Filepath of the install script, otherwise an empty string.
 ###############################################################################
 function execute_install_script {
-  local package_name=$(basename ${2} | awk -F\= '{print $1}')  
-  local install_script_filepath=$(\
-    get_install_script_filepath "${1}" "${package_name}" "${3}")
+  local package_name=$(basename ${2} | awk -F\= '{print $1}')
+  local install_script_filepath=$(
+    get_install_script_filepath "${1}" "${package_name}" "${3}"
+  )
   if test ! -z "${install_script_filepath}"; then
     log "- Executing ${install_script_filepath}..."
     # Don't abort on errors; dpkg-trigger will error normally since it is
@@ -40,9 +41,10 @@ function execute_install_script {
 ###############################################################################
 function get_install_script_filepath {
   # Filename includes arch (e.g. amd64).
-  local filepath="$(\
-    ls -1 ${1}var/lib/dpkg/info/${2}*.${3} 2> /dev/null \
-    | grep -E ${2}'(:.*)?.'${3} | head -1 || true)"
+  local filepath="$(
+    ls -1 ${1}var/lib/dpkg/info/${2}*.${3} 2>/dev/null |
+      grep -E ${2}'(:.*)?.'${3} | head -1 || true
+  )"
   test "${filepath}" && echo "${filepath}"
 }
 
@@ -54,21 +56,21 @@ function get_install_script_filepath {
 #   The list of colon delimited action syntax pairs with each pair equals
 #   delimited. <name>:<version> <name>:<version>...
 ###############################################################################
-function get_installed_packages {   
+function get_installed_packages {
   local install_log_filepath="${1}"
-  local regex="^Unpacking ([^ :]+)([^ ]+)? (\[[^ ]+\]\s)?\(([^ )]+)"  
-  local dep_packages=""  
+  local regex="^Unpacking ([^ :]+)([^ ]+)? (\[[^ ]+\]\s)?\(([^ )]+)"
+  local dep_packages=""
   while read -r line; do
     # ${regex} should be unquoted since it isn't a literal.
     if [[ "${line}" =~ ${regex} ]]; then
-      dep_packages="${dep_packages}${BASH_REMATCH[1]}=${BASH_REMATCH[4]} "      
+      dep_packages="${dep_packages}${BASH_REMATCH[1]}=${BASH_REMATCH[4]} "
     else
       log_err "Unable to parse package name and version from \"${line}\""
       exit 2
     fi
   done < <(grep "^Unpacking " ${install_log_filepath})
   if test -n "${dep_packages}"; then
-    echo "${dep_packages:0:-1}"  # Removing trailing space.
+    echo "${dep_packages:0:-1}" # Removing trailing space.
   else
     echo ""
   fi
@@ -83,7 +85,7 @@ function get_installed_packages {
 ###############################################################################
 function get_package_name_ver {
   local ORIG_IFS="${IFS}"
-  IFS=\= read name ver <<< "${1}"
+  IFS=\= read name ver <<<"${1}"
   IFS="${ORIG_IFS}"
   # If version not found in the fully qualified package value.
   if test -z "${ver}"; then
@@ -91,7 +93,7 @@ function get_package_name_ver {
     log_err "Unexpected version resolution for package '${name}'"
     ver="$(apt-cache show ${name} | grep '^Version:' | awk '{print $2}')"
   fi
-  echo "${name}" "${ver}"  
+  echo "${name}" "${ver}"
 }
 
 ###############################################################################
@@ -105,11 +107,10 @@ function get_normalized_package_list {
   # Remove commas, and block scalar folded backslashes,
   # extraneous spaces at the middle, beginning and end
   # then sort.
-  echo "${1}"
 
-  local packages=$(echo "${1}" \
-    | sed 's/[,\]/ /g; s/\s\+/ /g; s/^\s\+//g; s/\s\+$//g' \
-    | sort -t' ')
+  local packages=$(echo "${1}" |
+    sed 's/[,\]/ /g; s/\s\+/ /g; s/^\s\+//g; s/\s\+$//g' |
+    sort -t' ')
   local script_dir="$(dirname -- "$(realpath -- "${0}")")"
 
   local architecture=$(dpkg --print-architecture)
@@ -138,7 +139,7 @@ function get_tar_relpath {
 }
 
 function log { echo "$(date +%T.%3N)" "${@}"; }
-function log_err { >&2 echo "$(date +%T.%3N)" "${@}"; }
+function log_err { echo >&2 "$(date +%T.%3N)" "${@}"; }
 
 function log_empty_line { echo ""; }
 
@@ -168,13 +169,13 @@ function validate_bool {
 # Returns:
 #   Log lines from write.
 ###############################################################################
-function write_manifest {  
-  if [ ${#2} -eq 0 ]; then 
+function write_manifest {
+  if [ ${#2} -eq 0 ]; then
     log "Skipped ${1} manifest write. No packages to install."
   else
     log "Writing ${1} packages manifest to ${3}..."
     # 0:-1 to remove trailing comma, delimit by newline and sort.
-    echo "${2:0:-1}" | tr ',' '\n' | sort > ${3}
+    echo "${2:0:-1}" | tr ',' '\n' | sort >${3}
     log "done"
   fi
 }
