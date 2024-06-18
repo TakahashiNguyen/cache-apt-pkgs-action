@@ -61,7 +61,7 @@ runs:
           \"$VERSION\" \
           \"$EXEC_INSTALL_SCRIPTS\" \
           $DEBUG \
-          \"$PACKAGES\"
+          $PACKAGES
         echo "CACHE_KEY=$(cat ~/cache-apt-pkgs/cache_key.md5)" >> $GITHUB_ENV
 
     - id: load-cache
