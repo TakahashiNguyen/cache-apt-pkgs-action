@@ -60,7 +60,7 @@ runs:
           ~/cache-apt-pkgs \
           \"$VERSION\" \
           \"$EXEC_INSTALL_SCRIPTS\" \
-          \"$DEBUG\" \
+          $DEBUG \
           \"$PACKAGES\"
         echo "CACHE_KEY=$(cat ~/cache-apt-pkgs/cache_key.md5)" >> $GITHUB_ENV
 
