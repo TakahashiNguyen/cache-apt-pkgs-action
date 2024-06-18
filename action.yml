@@ -42,10 +42,10 @@ outputs:
 runs:
   using: "composite"
   steps:
-    - id: trust scripts
-      run: |
+    - run: |
         chmod +x ${GITHUB_ACTION_PATH}/pre_cache_action.sh
         chmod +x ${GITHUB_ACTION_PATH}/post_cache_action.sh
+      shell: bash
     - id: pre-cache
       run: |
         ${GITHUB_ACTION_PATH}/pre_cache_action.sh \
