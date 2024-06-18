@@ -56,6 +56,10 @@ runs:
         PACKAGES: ${{ inputs.packages }}
       shell: bash
       run: |
+        echo "$PACKAGES"
+        echo \"$VERSION\" \
+          $EXEC_INSTALL_SCRIPTS \
+          $DEBUG "$PACKAGES"
         ${GITHUB_ACTION_PATH}/pre_cache_action.sh \
           ~/cache-apt-pkgs \
           \"$VERSION\" \
