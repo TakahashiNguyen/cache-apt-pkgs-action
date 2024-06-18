@@ -27,6 +27,8 @@ debug="${4}"
 # List of the packages to use.
 input_packages="${@:5}"
 
+echo ${cache_dir} ${version} ${execute_install_scripts} ${debug} ${input_packages}
+
 # Trim commas, excess spaces, and sort.
 log "Normalizing package list..."
 packages="$(get_normalized_package_list "${input_packages}")"
