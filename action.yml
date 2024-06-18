@@ -13,7 +13,7 @@ inputs:
   version:
     description: "Version of cache to load. Each version will have its own cache. Note, all characters except spaces are allowed."
     required: false
-    default: ""
+    default: "1.0"
   execute_install_scripts:
     description: "Execute Debian package pre and post install script upon restore. See README.md caveats for more information."
     required: false
