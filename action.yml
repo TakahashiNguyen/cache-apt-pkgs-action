@@ -1,42 +1,42 @@
-name: 'Cache APT Packages'
-description: 'Install APT based packages and cache them for future runs.'
+name: "Cache APT Packages"
+description: "Install APT based packages and cache them for future runs."
 author: awalsh128
 branding:
-  icon: 'hard-drive'  
-  color: 'green'
+  icon: "hard-drive"
+  color: "green"
 
 inputs:
   packages:
-    description: 'Space delimited list of packages to install. Version can be specified optionally using APT command syntax of <name>=<version> (e.g. xdot=1.2-2).'
+    description: "Space delimited list of packages to install. Version can be specified optionally using APT command syntax of <name>=<version> (e.g. xdot=1.2-2)."
     required: true
-    default: ''
+    default: ""
   version:
-    description: 'Version of cache to load. Each version will have its own cache. Note, all characters except spaces are allowed.'
+    description: "Version of cache to load. Each version will have its own cache. Note, all characters except spaces are allowed."
     required: false
-    default: '' 
+    default: ""
   execute_install_scripts:
-    description: 'Execute Debian package pre and post install script upon restore. See README.md caveats for more information.'
+    description: "Execute Debian package pre and post install script upon restore. See README.md caveats for more information."
     required: false
-    default: 'false'
+    default: "false"
   refresh:
-    description: 'OBSOLETE: Refresh is not used by the action, use version instead.'
-    deprecationMessage: 'Refresh is not used by the action, use version instead.'
+    description: "OBSOLETE: Refresh is not used by the action, use version instead."
+    deprecationMessage: "Refresh is not used by the action, use version instead."
   debug:
-    description: 'Enable debugging when there are issues with action. Minor performance penalty.'
+    description: "Enable debugging when there are issues with action. Minor performance penalty."
     required: false
-    default: 'false'
+    default: "false"
 
 outputs:
   cache-hit:
-    description: 'A boolean value to indicate a cache was found for the packages requested.'
+    description: "A boolean value to indicate a cache was found for the packages requested."
     # This compound expression is needed because lhs can be empty.
     # Need to output true and false instead of true and nothing.
     value: ${{ steps.load-cache.outputs.cache-hit || false }}
   package-version-list:
-    description: 'The main requested packages and versions that are installed. Represented as a comma delimited list with equals delimit on the package version (i.e. <package>:<version,<package>:<version>).'
+    description: "The main requested packages and versions that are installed. Represented as a comma delimited list with equals delimit on the package version (i.e. <package>:<version,<package>:<version>)."
     value: ${{ steps.post-cache.outputs.package-version-list }}
   all-package-version-list:
-    description: 'All the pulled in packages and versions, including dependencies, that are installed. Represented as a comma delimited list with equals delimit on the package version (i.e. <package>:<version,<package>:<version>).'
+    description: "All the pulled in packages and versions, including dependencies, that are installed. Represented as a comma delimited list with equals delimit on the package version (i.e. <package>:<version,<package>:<version>)."
     value: ${{ steps.post-cache.outputs.all-package-version-list }}
 
 runs:
@@ -48,6 +48,11 @@ runs:
         chmod +x ${GITHUB_ACTION_PATH}/apt_query
       shell: bash
     - id: pre-cache
+      env:
+        VERSION: "${{ inputs.version }}"
+        EXEC_INSTALL_SCRIPTS: "${{ inputs.execute_install_scripts }}"
+        DEBUG: "${{ inputs.debug }}"
+        PACKAGES: "${{ inputs.packages }}"
       run: |
         ${GITHUB_ACTION_PATH}/pre_cache_action.sh \
           ~/cache-apt-pkgs \
@@ -57,11 +62,6 @@ runs:
           "$PACKAGES"
         echo "CACHE_KEY=$(cat ~/cache-apt-pkgs/cache_key.md5)" >> $GITHUB_ENV
       shell: bash
-      env:
-         VERSION: "${{ inputs.version }}"
-         EXEC_INSTALL_SCRIPTS: "${{ inputs.execute_install_scripts }}"
-         DEBUG: "${{ inputs.debug }}"
-         PACKAGES: "${{ inputs.packages }}"
 
     - id: load-cache
       uses: actions/cache/restore@v4
@@ -83,10 +83,10 @@ runs:
         echo "all-package-version-list=$(create_list all)" >> $GITHUB_OUTPUT
       shell: bash
       env:
-         CACHE_HIT: "${{ steps.load-cache.outputs.cache-hit }}"
-         EXEC_INSTALL_SCRIPTS: "${{ inputs.execute_install_scripts }}"
-         DEBUG: "${{ inputs.debug }}"
-         PACKAGES: "${{ inputs.packages }}"
+        CACHE_HIT: "${{ steps.load-cache.outputs.cache-hit }}"
+        EXEC_INSTALL_SCRIPTS: "${{ inputs.execute_install_scripts }}"
+        DEBUG: "${{ inputs.debug }}"
+        PACKAGES: "${{ inputs.packages }}"
 
     - id: upload-logs
       if: ${{ inputs.debug == 'true' }}
