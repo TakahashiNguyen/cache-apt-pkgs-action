@@ -47,7 +47,13 @@ runs:
         chmod +x ${GITHUB_ACTION_PATH}/pre_cache_action.sh
         chmod +x ${GITHUB_ACTION_PATH}/post_cache_action.sh
         chmod +x ${GITHUB_ACTION_PATH}/apt_query
+        echo $PACKAGES
       shell: bash
+      env:
+        VERSION: ${{ inputs.version }}
+        EXEC_INSTALL_SCRIPTS: ${{ inputs.execute_install_scripts }}
+        DEBUG: ${{ inputs.debug }}
+        PACKAGES: ${{ inputs.packages }}
     - id: pre-cache
       env:
         VERSION: ${{ inputs.version }}
