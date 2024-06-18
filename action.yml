@@ -47,6 +47,7 @@ runs:
         chmod +x ${GITHUB_ACTION_PATH}/pre_cache_action.sh
         chmod +x ${GITHUB_ACTION_PATH}/post_cache_action.sh
         chmod +x ${GITHUB_ACTION_PATH}/apt_query
+        chmod +x ${GITHUB_ACTION_PATH}/install_and_cache_pkgs.sh
       shell: bash
     - id: pre-cache
       run: |

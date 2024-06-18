@@ -75,5 +75,5 @@ log "- Value hashed as '${key}'."
 log "done"
 
 key_filepath="${cache_dir}/cache_key.md5"
-echo ${key} >${key_filepath}
+echo ${key} > ${key_filepath}
 log "Hash value written to ${key_filepath}"
