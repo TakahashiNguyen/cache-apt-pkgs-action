@@ -42,17 +42,19 @@ outputs:
 runs:
   using: "composite"
   steps:
-    - run: |
+    - name: Trust scripts
+      run: |
         chmod +x ${GITHUB_ACTION_PATH}/pre_cache_action.sh
         chmod +x ${GITHUB_ACTION_PATH}/post_cache_action.sh
         chmod +x ${GITHUB_ACTION_PATH}/apt_query
       shell: bash
     - id: pre-cache
       env:
-        VERSION: "${{ inputs.version }}"
-        EXEC_INSTALL_SCRIPTS: "${{ inputs.execute_install_scripts }}"
-        DEBUG: "${{ inputs.debug }}"
-        PACKAGES: "${{ inputs.packages }}"
+        VERSION: ${{ inputs.version }}
+        EXEC_INSTALL_SCRIPTS: ${{ inputs.execute_install_scripts }}
+        DEBUG: ${{ inputs.debug }}
+        PACKAGES: ${{ inputs.packages }}
+      shell: bash
       run: |
         ${GITHUB_ACTION_PATH}/pre_cache_action.sh \
           ~/cache-apt-pkgs \
@@ -61,7 +63,6 @@ runs:
           "$DEBUG" \
           "$PACKAGES"
         echo "CACHE_KEY=$(cat ~/cache-apt-pkgs/cache_key.md5)" >> $GITHUB_ENV
-      shell: bash
 
     - id: load-cache
       uses: actions/cache/restore@v4
