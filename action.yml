@@ -17,7 +17,7 @@ inputs:
   execute_install_scripts:
     description: "Execute Debian package pre and post install script upon restore. See README.md caveats for more information."
     required: false
-    default: "false"
+    default: false
   refresh:
     description: "OBSOLETE: Refresh is not used by the action, use version instead."
     deprecationMessage: "Refresh is not used by the action, use version instead."
@@ -59,9 +59,8 @@ runs:
         ${GITHUB_ACTION_PATH}/pre_cache_action.sh \
           ~/cache-apt-pkgs \
           \"$VERSION\" \
-          \"$EXEC_INSTALL_SCRIPTS\" \
-          $DEBUG \
-          $PACKAGES
+          $EXEC_INSTALL_SCRIPTS \
+          $DEBUG $PACKAGES
         echo "CACHE_KEY=$(cat ~/cache-apt-pkgs/cache_key.md5)" >> $GITHUB_ENV
 
     - id: load-cache
