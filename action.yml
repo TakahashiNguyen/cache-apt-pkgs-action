@@ -24,7 +24,7 @@ inputs:
   debug:
     description: "Enable debugging when there are issues with action. Minor performance penalty."
     required: false
-    default: "false"
+    default: false
 
 outputs:
   cache-hit:
